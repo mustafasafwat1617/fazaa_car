@@ -6,6 +6,8 @@ import 'mechanics_list_page.dart';
 import 'mechanic_page.dart';
 import 'orders_page.dart';
 import 'request_help_page.dart';
+import 'phone_login_page.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();

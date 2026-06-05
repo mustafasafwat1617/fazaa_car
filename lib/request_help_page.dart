@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'orders_page.dart';
+import 'package:geolocator/geolocator.dart';
 
 class RequestHelpPage extends StatefulWidget {
   const RequestHelpPage({super.key});
@@ -17,7 +18,39 @@ String serviceType = 'ميكانيكي';
   String carType = 'سيارة بنزين';
   bool isLoading = false;
 
+  double? latitude;
+  double? longitude;
+
   @override
+
+Future<void> getCurrentLocation() async {
+  bool serviceEnabled;
+  LocationPermission permission;
+
+  serviceEnabled = await Geolocator.isLocationServiceEnabled();
+  if (!serviceEnabled) {
+    return;
+  }
+
+  permission = await Geolocator.checkPermission();
+
+  if (permission == LocationPermission.denied) {
+    permission = await Geolocator.requestPermission();
+  }
+
+  if (permission == LocationPermission.deniedForever) {
+    return;
+  }
+
+  Position position = await Geolocator.getCurrentPosition(
+    desiredAccuracy: LocationAccuracy.high,
+  );
+
+  latitude = position.latitude;
+  longitude = position.longitude;
+}
+
+
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
@@ -135,6 +168,7 @@ SizedBox(
                                 setState(() {
                                   isLoading = true;
                                 });
+                                await getCurrentLocation();
                                 final requestId = phoneController.text.trim();
 
              await FirebaseFirestore.instance
@@ -146,6 +180,8 @@ SizedBox(
                'carType': carType,
                'serviceType': serviceType,
                'problem': problemController.text,
+               'latitude': latitude,
+               'longitude': longitude,
                'status': 'جديد',
                'createdAt': FieldValue.serverTimestamp(),
              });
