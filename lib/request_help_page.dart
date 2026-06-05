@@ -15,6 +15,7 @@ class _RequestHelpPageState extends State<RequestHelpPage> {
   final problemController = TextEditingController();
 String serviceType = 'ميكانيكي';
   String carType = 'سيارة بنزين';
+  bool isLoading = false;
 
   @override
   Widget build(BuildContext context) {
@@ -119,8 +120,27 @@ String serviceType = 'ميكانيكي';
 SizedBox(
   height: 55,
   child: ElevatedButton.icon(
-           onPressed: () async {
-             await FirebaseFirestore.instance.collection('requests').add({
+           onPressed: isLoading ? null : () async {
+           if (nameController.text.trim().isEmpty ||
+                                    phoneController.text.trim().isEmpty ||
+                                    problemController.text.trim().isEmpty) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                      content: Text('يرجى ملء جميع الحقول'),
+                                    ),
+                                  );
+                                  return;
+                                }
+
+                                setState(() {
+                                  isLoading = true;
+                                });
+                                final requestId = phoneController.text.trim();
+
+             await FirebaseFirestore.instance
+                 .collection('requests')
+                 .doc(requestId)
+                 .set({
                'customerName': nameController.text,
                'phone': phoneController.text,
                'carType': carType,
@@ -129,7 +149,9 @@ SizedBox(
                'status': 'جديد',
                'createdAt': FieldValue.serverTimestamp(),
              });
-
+setState(() {
+  isLoading = false;
+});
              ScaffoldMessenger.of(context).showSnackBar(
                const SnackBar(
                  content: Text('تم إرسال طلب الفزعة بنجاح'),
