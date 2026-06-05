@@ -15,7 +15,7 @@ class RequestsListPage extends StatelessWidget {
       body: StreamBuilder<QuerySnapshot>(
         stream: FirebaseFirestore.instance
             .collection('requests')
-            .orderBy('createdAt', descending: true)
+            .where('status', isEqualTo: 'جديد')
             .snapshots(),
         builder: (context, snapshot) {
           if (!snapshot.hasData) {
