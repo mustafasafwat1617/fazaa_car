@@ -98,6 +98,23 @@ class RequestsListPage extends StatelessWidget {
                           );
                         },
                       ),
+                      const SizedBox(height: 8),
+
+                      ElevatedButton.icon(
+                        icon: const Icon(Icons.check_circle),
+                        label: const Text('قبول الطلب'),
+                        onPressed: () async {
+                          await requests[index].reference.update({
+                            'status': 'تم القبول',
+                          });
+
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('تم قبول الطلب بنجاح'),
+                            ),
+                          );
+                        },
+                      ),
                     ],
                   ),
                 ),
