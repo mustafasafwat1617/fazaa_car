@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:geolocator/geolocator.dart';
 
 class MechanicPage extends StatelessWidget {
   const MechanicPage({super.key});
@@ -58,10 +59,16 @@ class MechanicPage extends StatelessWidget {
 
             ElevatedButton(
             onPressed: () async {
-              await FirebaseFirestore.instance.collection('mechanics').add({
+            Position position = await Geolocator.getCurrentPosition(
+              desiredAccuracy: LocationAccuracy.high,
+            );
+              await
+              FirebaseFirestore.instance.collection('mechanics').add({
                 'name': nameController.text,
                 'phone': phoneController.text,
                 'specialty': serviceType,
+                'latitude': position.latitude,
+                'longitude': position.longitude,
                 'createdAt': FieldValue.serverTimestamp(),
               });
 
