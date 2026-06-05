@@ -45,7 +45,7 @@ class HomePage extends StatelessWidget {
               const Icon(Icons.car_repair, size: 110, color: Colors.green),
               const SizedBox(height: 25),
               const Text(
-                'مرحباً بك في فزعة كار',
+                'مرحبا بك في فزعة كار',
                 style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 40),
