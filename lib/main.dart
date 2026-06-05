@@ -8,6 +8,7 @@ import 'orders_page.dart';
 import 'request_help_page.dart';
 import 'phone_login_page.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'accepted_requests_page.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
@@ -93,6 +94,26 @@ class HomePage extends StatelessWidget {
             ),
 
             const SizedBox(height: 15),
+
+const SizedBox(height: 10),
+SizedBox(
+  width: double.infinity,
+  height: 55,
+  child: ElevatedButton(
+    onPressed: () {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => const AcceptedRequestsPage(),
+        ),
+      );
+    },
+    child: const Text(
+      'الطلبات المقبولة',
+      style: TextStyle(fontSize: 22),
+    ),
+  ),
+),
 
             SizedBox(
               width: double.infinity,
