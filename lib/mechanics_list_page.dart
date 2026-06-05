@@ -5,10 +5,16 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 class MechanicsListPage extends StatefulWidget {
-  const MechanicsListPage({super.key});
+  final String specialty;
+
+  const MechanicsListPage({
+    super.key,
+    required this.specialty,
+  });
 
   @override
-  State<MechanicsListPage> createState() => _MechanicsListPageState();
+  State<MechanicsListPage> createState() =>
+      _MechanicsListPageState();
 }
 
 class _MechanicsListPageState extends State<MechanicsListPage> {
@@ -22,7 +28,7 @@ class _MechanicsListPageState extends State<MechanicsListPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('مقدمو الخدمة'),
+        title: Text(widget.specialty),
       ),
       body: FutureBuilder<Position>(
         future: getCurrentLocation(),
@@ -35,8 +41,12 @@ class _MechanicsListPageState extends State<MechanicsListPage> {
 
           return StreamBuilder<QuerySnapshot>(
             stream: FirebaseFirestore.instance
-                .collection('mechanics')
-                .snapshots(),
+                        .collection('mechanics')
+                        .where(
+                          'specialty',
+                          isEqualTo: widget.specialty,
+                        )
+                        .snapshots(),
             builder: (context, snapshot) {
               if (!snapshot.hasData) {
                 return const Center(child: CircularProgressIndicator());

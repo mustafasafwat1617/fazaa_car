@@ -98,11 +98,47 @@ class HomePage extends StatelessWidget {
               width: double.infinity,
               height: 55,
               child: ElevatedButton(
-                onPressed: () {
+                onPressed: () async {
+                  final selectedType = await showDialog<String>(
+                    context: context,
+                    builder: (context) => AlertDialog(
+                      title: const Text('اختر نوع الخدمة'),
+                      content: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          ListTile(
+                            leading: const Icon(Icons.build),
+                            title: const Text('ميكانيكي'),
+                            onTap: () => Navigator.pop(context, 'ميكانيكي'),
+                          ),
+                          ListTile(
+                            leading: const Icon(Icons.electrical_services),
+                            title: const Text('كهربائي سيارات'),
+                            onTap: () => Navigator.pop(context, 'كهربائي سيارات'),
+                          ),
+                          ListTile(
+                            leading: const Icon(Icons.tire_repair),
+                            title: const Text('بنجري'),
+                            onTap: () => Navigator.pop(context, 'بنجري'),
+                          ),
+                          ListTile(
+                            leading: const Icon(Icons.battery_charging_full),
+                            title: const Text('تبديل بطاريات'),
+                            onTap: () => Navigator.pop(context, 'تبديل بطاريات'),
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+
+                  if (selectedType == null) return;
+
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (_) => const MechanicsListPage(),
+                      builder: (_) => MechanicsListPage(
+                        specialty: selectedType,
+                      ),
                     ),
                   );
                 },
