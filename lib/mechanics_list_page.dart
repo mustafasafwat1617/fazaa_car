@@ -33,6 +33,35 @@ class _MechanicsListPageState extends State<MechanicsListPage> {
       body: FutureBuilder<Position>(
         future: getCurrentLocation(),
         builder: (context, locationSnapshot) {
+        if (locationSnapshot.hasError) {
+          return Center(
+            child: Padding(
+              padding: const EdgeInsets.all(20),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(
+                    Icons.location_off,
+                    size: 70,
+                    color: Colors.red,
+                  ),
+                  const SizedBox(height: 15),
+                  const Text(
+                    'يجب السماح بالوصول للموقع لعرض مقدمي الخدمة',
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 15),
+                  ElevatedButton(
+                    onPressed: () async {
+                      await Geolocator.openAppSettings();
+                    },
+                    child: const Text('فتح الإعدادات'),
+                  ),
+                ],
+              ),
+            ),
+          );
+        }
           if (!locationSnapshot.hasData) {
             return const Center(child: CircularProgressIndicator());
           }

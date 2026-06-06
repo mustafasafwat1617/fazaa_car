@@ -111,28 +111,6 @@ class AcceptedRequestsPage extends StatelessWidget {
                         },
                       ),
 
-                      ElevatedButton.icon(
-                        icon: const FaIcon(
-                          FontAwesomeIcons.whatsapp,
-                          color: Colors.green,
-                        ),
-                        label: const Text('واتساب'),
-                        onPressed: () async {
-                          String phone = data['phone'] ?? '';
-
-                          if (phone.startsWith('0')) {
-                            phone = '964${phone.substring(1)}';
-                          }
-
-                          final url = Uri.parse('https://wa.me/$phone');
-
-                          await launchUrl(
-                            url,
-                            mode: LaunchMode.externalApplication,
-                          );
-                        },
-                      ),
-
                       const SizedBox(height: 8),
 
                       ElevatedButton.icon(

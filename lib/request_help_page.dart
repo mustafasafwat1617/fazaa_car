@@ -3,7 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'orders_page.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-
+import 'my_requests_page.dart';
 class RequestHelpPage extends StatefulWidget {
   const RequestHelpPage({super.key});
 
@@ -197,16 +197,16 @@ setState(() {
                ),
              );
 
-             Navigator.push(
+             nameController.clear();
+             phoneController.clear();
+             problemController.clear();
+
+             if (!context.mounted) return;
+
+             Navigator.pushReplacement(
                context,
                MaterialPageRoute(
-                 builder: (context) => OrdersPage(
-                   name: nameController.text,
-                   phone: phoneController.text,
-                   carType: carType,
-                   serviceType: serviceType,
-                   problem: problemController.text,
-                 ),
+                 builder: (context) => const MyRequestsPage(),
                ),
              );
            },
