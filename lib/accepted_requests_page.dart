@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class AcceptedRequestsPage extends StatelessWidget {
   const AcceptedRequestsPage({super.key});
@@ -16,6 +17,10 @@ class AcceptedRequestsPage extends StatelessWidget {
         stream: FirebaseFirestore.instance
             .collection('requests')
             .where('status', isEqualTo: 'تم القبول')
+            .where(
+              'acceptedBy',
+              isEqualTo: FirebaseAuth.instance.currentUser?.uid,
+            )
             .snapshots(),
         builder: (context, snapshot) {
           if (!snapshot.hasData) {
