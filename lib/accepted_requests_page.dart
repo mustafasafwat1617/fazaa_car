@@ -3,12 +3,32 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:geolocator/geolocator.dart';
 
 class AcceptedRequestsPage extends StatelessWidget {
   const AcceptedRequestsPage({super.key});
 
+  Future<Position> getCurrentLocation() async {
+    LocationPermission permission = await Geolocator.checkPermission();
+
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+    }
+
+    if (permission == LocationPermission.denied ||
+        permission == LocationPermission.deniedForever) {
+      throw Exception('لم يتم السماح بالموقع');
+    }
+
+    return await Geolocator.getCurrentPosition(
+      desiredAccuracy: LocationAccuracy.high,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    final uid = FirebaseAuth.instance.currentUser?.uid;
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('الطلبات المقبولة'),
@@ -16,18 +36,18 @@ class AcceptedRequestsPage extends StatelessWidget {
       body: StreamBuilder<QuerySnapshot>(
         stream: FirebaseFirestore.instance
             .collection('requests')
-            .where('status', isEqualTo: 'تم القبول')
-            .where(
-              'acceptedBy',
-              isEqualTo: FirebaseAuth.instance.currentUser?.uid,
-            )
+            .where('acceptedBy', isEqualTo: uid)
             .snapshots(),
         builder: (context, snapshot) {
           if (!snapshot.hasData) {
             return const Center(child: CircularProgressIndicator());
           }
 
-          final requests = snapshot.data!.docs;
+          final requests = snapshot.data!.docs.where((doc) {
+            final data = doc.data() as Map<String, dynamic>;
+            return data['status'] == 'تم القبول' ||
+                data['status'] == 'في الطريق';
+          }).toList();
 
           if (requests.isEmpty) {
             return const Center(
@@ -38,8 +58,7 @@ class AcceptedRequestsPage extends StatelessWidget {
           return ListView.builder(
             itemCount: requests.length,
             itemBuilder: (context, index) {
-              final data =
-                  requests[index].data() as Map<String, dynamic>;
+              final data = requests[index].data() as Map<String, dynamic>;
 
               return Card(
                 margin: const EdgeInsets.all(10),
@@ -51,12 +70,13 @@ class AcceptedRequestsPage extends StatelessWidget {
                       Text('${data['serviceType']} - ${data['phone']}'),
                       Text('السيارة: ${data['carType'] ?? ''}'),
                       Text('العطل: ${data['problem'] ?? ''}'),
-                      const Text('الحالة: تم القبول'),
+                      Text('الحالة: ${data['status'] ?? ''}'),
+
                       const SizedBox(height: 8),
 
                       ElevatedButton.icon(
                         icon: const Icon(Icons.location_on),
-                        label: const Text('فتح الموقع'),
+                        label: const Text('فتح موقع الزبون'),
                         onPressed: () async {
                           final lat = data['latitude'];
                           final lng = data['longitude'];
@@ -71,6 +91,53 @@ class AcceptedRequestsPage extends StatelessWidget {
                             url,
                             mode: LaunchMode.externalApplication,
                           );
+                        },
+                      ),
+
+                      const SizedBox(height: 8),
+
+                      ElevatedButton.icon(
+                        icon: const Icon(Icons.my_location),
+                        label: const Text('تحديث موقعي للزبون'),
+                        onPressed: () async {
+                          try {
+                            final position = await getCurrentLocation();
+
+                            await requests[index].reference.update({
+                              'mechanicLatitude': position.latitude,
+                              'mechanicLongitude': position.longitude,
+                              'mechanicLocationUpdatedAt':
+                                  FieldValue.serverTimestamp(),
+                            });
+
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text('تم تحديث موقعك للزبون'),
+                              ),
+                            );
+                          } catch (e) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text('يجب السماح بالوصول للموقع'),
+                              ),
+                            );
+                          }
+                        },
+                      ),
+
+                      const SizedBox(height: 8),
+
+                      ElevatedButton.icon(
+                        icon: const Icon(Icons.directions_car),
+                        label: const Text('أنا في الطريق'),
+                        onPressed: () async {
+                          final position = await getCurrentLocation();
+
+                          await requests[index].reference.update({
+                            'status': 'في الطريق',
+                            'mechanicLatitude': position.latitude,
+                            'mechanicLongitude': position.longitude,
+                          });
                         },
                       ),
 
@@ -101,8 +168,7 @@ class AcceptedRequestsPage extends StatelessWidget {
                             phone = '964${phone.substring(1)}';
                           }
 
-                          final url =
-                              Uri.parse('https://wa.me/$phone');
+                          final url = Uri.parse('https://wa.me/$phone');
 
                           await launchUrl(
                             url,
@@ -118,7 +184,7 @@ class AcceptedRequestsPage extends StatelessWidget {
                         label: const Text('إنهاء الطلب'),
                         onPressed: () async {
                           await requests[index].reference.update({
-                            'status': 'مكتمل',
+                            'status': 'تم الإنجاز',
                           });
 
                           ScaffoldMessenger.of(context).showSnackBar(

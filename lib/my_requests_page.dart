@@ -36,96 +36,133 @@ class MyRequestsPage extends StatelessWidget {
           return ListView.builder(
             itemCount: requests.length,
             itemBuilder: (context, index) {
-              final data =
-                  requests[index].data() as Map<String, dynamic>;
+              final data = requests[index].data() as Map<String, dynamic>;
 
               return Card(
                 margin: const EdgeInsets.all(10),
-                child: ListTile(
-                  title: Text(data['serviceType'] ?? ''),
-                  subtitle: Column(
+                child: Padding(
+                  padding: const EdgeInsets.all(12),
+                  child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      Text(
+                        data['serviceType'] ?? '',
+                        style: const TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+
+                      const SizedBox(height: 8),
+
                       Text('السيارة: ${data['carType'] ?? ''}'),
                       Text('العطل: ${data['problem'] ?? ''}'),
-                      Text('الحالة: ${data['status'] ?? 'جديد'}'),
+
+                      Text(
+                        data['status'] == 'تم القبول'
+                            ? '✅ تم القبول'
+                            : data['status'] == 'في الطريق'
+                                ? '🚗 في الطريق'
+                                : data['status'] == 'تم الإنجاز'
+                                    ? '🎉 تم إنجاز الطلب'
+                                    : '⏳ بانتظار الميكانيكي',
+                        style: TextStyle(
+                          color: data['status'] == 'تم القبول' ||
+                                  data['status'] == 'في الطريق'
+                              ? Colors.green
+                              : data['status'] == 'تم الإنجاز'
+                                  ? Colors.blue
+                                  : Colors.orange,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+
+                      const SizedBox(height: 10),
+
                       if (data['acceptedPhone'] != null)
-                        Text(
-                          'رقم الميكانيكي: ${data['acceptedPhone']}',
-                          style: const TextStyle(
+                        ElevatedButton.icon(
+                          icon: const Icon(Icons.phone),
+                          label: const Text('اتصال بالميكانيكي'),
+                          onPressed: () async {
+                            final phone = data['acceptedPhone'];
+                            final url = Uri.parse('tel:$phone');
+                            await launchUrl(url);
+                          },
+                        ),
+
+                      const SizedBox(height: 8),
+
+                      if (data['acceptedPhone'] != null)
+                        ElevatedButton.icon(
+                          icon: const FaIcon(
+                            FontAwesomeIcons.whatsapp,
+                            color: Colors.green,
+                          ),
+                          label: const Text('واتساب الميكانيكي'),
+                          onPressed: () async {
+                            String phone = data['acceptedPhone'] ?? '';
+
+                            phone = phone.replaceAll(' ', '');
+
+                            if (phone.startsWith('+')) {
+                              phone = phone.substring(1);
+                            }
+
+                            if (phone.startsWith('0')) {
+                              phone = '964${phone.substring(1)}';
+                            }
+
+                            final message = Uri.encodeComponent(
+                              'السلام عليكم، أنا صاحب طلب الفزعة.',
+                            );
+
+                            final url = Uri.parse(
+                              'https://wa.me/$phone?text=$message',
+                            );
+
+                            await launchUrl(
+                              url,
+                              mode: LaunchMode.externalApplication,
+                            );
+                          },
+                        ),
+
+                      const SizedBox(height: 8),
+
+                      if (data['acceptedPhone'] != null)
+                        const Text(
+                          '🚗 الميكانيكي في الطريق',
+                          style: TextStyle(
                             color: Colors.green,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
-                        const SizedBox(height: 8),
 
-                        if (data['acceptedPhone'] != null)
-                          ElevatedButton.icon(
-                            icon: const Icon(Icons.phone),
-                            label: const Text('اتصال بالميكانيكي'),
-                            onPressed: () async {
-                              final phone = data['acceptedPhone'];
-                              final url = Uri.parse('tel:$phone');
-                              await launchUrl(url);
-                            },
-                          ),
+                      const SizedBox(height: 8),
 
-                        const SizedBox(height: 8),
+                      if (data['mechanicLatitude'] != null &&
+                          data['mechanicLongitude'] != null)
+                        ElevatedButton.icon(
+                          icon: const Icon(Icons.location_on),
+                          label: const Text('تتبع الميكانيكي'),
+                          onPressed: () async {
+                            final lat = data['mechanicLatitude'];
+                            final lng = data['mechanicLongitude'];
 
-                        if (data['acceptedPhone'] != null)
-                          ElevatedButton.icon(
-                            icon: const FaIcon(
-                              FontAwesomeIcons.whatsapp,
-                              color: Colors.green,
-                            ),
-                            label: const Text('واتساب الميكانيكي'),
-                            onPressed: () async {
-                              String phone = data['acceptedPhone'] ?? '';
+                            final url = Uri.parse(
+                              'https://www.google.com/maps/search/?api=1&query=$lat,$lng',
+                            );
 
-                              phone = phone.replaceAll(' ', '');
+                            await launchUrl(
+                              url,
+                              mode: LaunchMode.externalApplication,
+                            );
+                          },
+                        ),
 
-                              if (phone.startsWith('+')) {
-                                phone = phone.substring(1);
-                              }
+                      const SizedBox(height: 8),
 
-                              if (phone.startsWith('0')) {
-                                phone = '964${phone.substring(1)}';
-                              }
 
-                              final message = Uri.encodeComponent(
-                                'السلام عليكم، أنا صاحب طلب الفزعة.',
-                              );
-
-                              final url = Uri.parse('https://wa.me/$phone?text=$message');
-
-                              await launchUrl(
-                                url,
-                                mode: LaunchMode.externalApplication,
-                              );
-                            },
-                          ),
-const SizedBox(height: 8),
-
-ElevatedButton.icon(
-  icon: const Icon(Icons.location_on),
-  label: const Text('فتح موقع الطلب'),
-  onPressed: () async {
-    final lat = data['latitude'];
-    final lng = data['longitude'];
-
-    if (lat == null || lng == null) return;
-
-    final url = Uri.parse(
-      'https://www.google.com/maps/search/?api=1&query=$lat,$lng',
-    );
-
-    await launchUrl(
-      url,
-      mode: LaunchMode.externalApplication,
-    );
-  },
-),
-                      Text('الهاتف: ${data['phone'] ?? ''}'),
                     ],
                   ),
                 ),

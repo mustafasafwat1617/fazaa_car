@@ -74,6 +74,11 @@ class _MechanicsListPageState extends State<MechanicsListPage> {
                         .where(
                           'specialty',
                           isEqualTo: widget.specialty,
+                          )
+                          .where(
+                            'available',
+                            isEqualTo: true,
+
                         )
                         .snapshots(),
             builder: (context, snapshot) {

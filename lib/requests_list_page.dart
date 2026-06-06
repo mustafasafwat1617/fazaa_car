@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:geolocator/geolocator.dart';
 
 class RequestsListPage extends StatelessWidget {
   const RequestsListPage({super.key});
@@ -105,12 +106,19 @@ class RequestsListPage extends StatelessWidget {
                         icon: const Icon(Icons.check_circle),
                         label: const Text('قبول الطلب'),
                         onPressed: () async {
-                          await requests[index].reference.update({
-                            'status': 'تم القبول',
-                            'acceptedBy': FirebaseAuth.instance.currentUser?.uid,
-                            'acceptedPhone': FirebaseAuth.instance.currentUser?.phoneNumber,
-                            'acceptedAt': FieldValue.serverTimestamp(),
-                          });
+
+                        Position mechanicPosition = await Geolocator.getCurrentPosition(
+                          desiredAccuracy: LocationAccuracy.high,
+                        );
+
+                        await requests[index].reference.update({
+                          'status': 'تم القبول',
+                          'acceptedBy': FirebaseAuth.instance.currentUser?.uid,
+                          'acceptedPhone': FirebaseAuth.instance.currentUser?.phoneNumber,
+                          'acceptedAt': FieldValue.serverTimestamp(),
+                          'mechanicLatitude': mechanicPosition.latitude,
+                          'mechanicLongitude': mechanicPosition.longitude,
+                        });
 
                           ScaffoldMessenger.of(context).showSnackBar(
                             const SnackBar(
