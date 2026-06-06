@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'orders_page.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class RequestHelpPage extends StatefulWidget {
   const RequestHelpPage({super.key});
@@ -175,6 +176,8 @@ SizedBox(
                  .collection('requests')
                  .doc(requestId)
                  .set({
+               'userId': FirebaseAuth.instance.currentUser?.uid,
+               'userPhone': FirebaseAuth.instance.currentUser?.phoneNumber,
                'customerName': nameController.text,
                'phone': phoneController.text,
                'carType': carType,

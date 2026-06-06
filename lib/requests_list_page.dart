@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class RequestsListPage extends StatelessWidget {
   const RequestsListPage({super.key});
@@ -106,6 +107,9 @@ class RequestsListPage extends StatelessWidget {
                         onPressed: () async {
                           await requests[index].reference.update({
                             'status': 'تم القبول',
+                            'acceptedBy': FirebaseAuth.instance.currentUser?.uid,
+                            'acceptedPhone': FirebaseAuth.instance.currentUser?.phoneNumber,
+                            'acceptedAt': FieldValue.serverTimestamp(),
                           });
 
                           ScaffoldMessenger.of(context).showSnackBar(
