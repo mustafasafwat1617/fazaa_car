@@ -10,6 +10,7 @@ import 'phone_login_page.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'accepted_requests_page.dart';
 import 'my_requests_page.dart';
+import 'tracking_map_page.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -49,7 +50,7 @@ class HomePage extends StatelessWidget {
         centerTitle: true,
         backgroundColor: Colors.green,
       ),
-      body: Center(
+      body: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.all(20),
           child: Column(
@@ -216,6 +217,27 @@ SizedBox(
                             },
                             child: const Text(
                               'طلبات الفزعة',
+                              style: TextStyle(fontSize: 22),
+                            ),
+                          ),
+                        ),
+
+                        SizedBox(
+                          width: double.infinity,
+                          height: 55,
+                          child: ElevatedButton(
+                            onPressed: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => const TrackingMapPage(
+                                                          mechanicId: 'demo_mechanic',
+                                                        ),
+                                ),
+                              );
+                            },
+                            child: const Text(
+                              'تجربة الخريطة',
                               style: TextStyle(fontSize: 22),
                             ),
                           ),

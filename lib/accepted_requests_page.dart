@@ -4,6 +4,7 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:geolocator/geolocator.dart';
+import 'tracking_map_page.dart';
 
 class AcceptedRequestsPage extends StatelessWidget {
   const AcceptedRequestsPage({super.key});
