@@ -1,0 +1,39 @@
+{
+  "flutter": {
+    "platforms": {
+      "android": {
+        "default": {
+          "projectId": "fazaa-car",
+          "appId": "1:581583582150:android:ef16a6b45313a2ebcdf8c7",
+          "fileOutput": "android/app/google-services.json"
+        }
+      },
+      "dart": {
+        "lib/firebase_options.dart": {
+          "projectId": "fazaa-car",
+          "configurations": {
+            "android": "1:581583582150:android:ef16a6b45313a2ebcdf8c7",
+            "ios": "1:581583582150:ios:17b5a6ef4c76e735cdf8c7",
+            "macos": "1:581583582150:ios:17b5a6ef4c76e735cdf8c7",
+            "web": "1:581583582150:web:5377c9af4e7c4d30cdf8c7",
+            "windows": "1:581583582150:web:1b555259a5d819e6cdf8c7"
+          }
+        }
+      }
+    }
+  },
+  "functions": [
+    {
+      "source": "functions",
+      "codebase": "default",
+      "disallowLegacyRuntimeConfig": true,
+      "ignore": [
+        "node_modules",
+        ".git",
+        "firebase-debug.log",
+        "firebase-debug.*.log",
+        "*.local"
+      ]
+    }
+  ]
+}

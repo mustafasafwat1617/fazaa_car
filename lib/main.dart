@@ -11,10 +11,26 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'accepted_requests_page.dart';
 import 'my_requests_page.dart';
 import 'tracking_map_page.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
+  await FirebaseMessaging.instance.requestPermission();
+
+  final token = await FirebaseMessaging.instance.getToken();
+  print('FCM TOKEN: $token');
+  final user = FirebaseAuth.instance.currentUser;
+
+  if (user != null && token != null) {
+    await FirebaseFirestore.instance.collection('users').doc(user.uid).set({
+      'fcmToken': token,
+      'phone': user.phoneNumber,
+      'updatedAt': FieldValue.serverTimestamp(),
+    }, SetOptions(merge: true));
+  }
 
   runApp(const FazaaCarApp());
 }

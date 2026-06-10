@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'tracking_map_page.dart';
 
 class MyRequestsPage extends StatelessWidget {
   const MyRequestsPage({super.key});
@@ -146,16 +147,13 @@ class MyRequestsPage extends StatelessWidget {
                           icon: const Icon(Icons.location_on),
                           label: const Text('تتبع الميكانيكي'),
                           onPressed: () async {
-                            final lat = data['mechanicLatitude'];
-                            final lng = data['mechanicLongitude'];
-
-                            final url = Uri.parse(
-                              'https://www.google.com/maps/search/?api=1&query=$lat,$lng',
-                            );
-
-                            await launchUrl(
-                              url,
-                              mode: LaunchMode.externalApplication,
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => TrackingMapPage(
+                                  mechanicId: requests[index].id,
+                                ),
+                              ),
                             );
                           },
                         ),

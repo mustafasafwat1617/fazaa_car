@@ -8,6 +8,66 @@ import 'package:geolocator/geolocator.dart';
 class RequestsListPage extends StatelessWidget {
   const RequestsListPage({super.key});
 
+  Future<void> _openMap(double? lat, double? lng) async {
+    if (lat == null || lng == null) return;
+
+    final url = Uri.parse(
+      'https://www.google.com/maps/search/?api=1&query=$lat,$lng',
+    );
+
+    await launchUrl(url, mode: LaunchMode.externalApplication);
+  }
+
+  Future<void> _callPhone(String phone) async {
+    if (phone.isEmpty) return;
+    final url = Uri.parse('tel:$phone');
+    await launchUrl(url);
+  }
+
+  Future<void> _openWhatsApp(String phone) async {
+    if (phone.isEmpty) return;
+
+    phone = phone.replaceAll(' ', '');
+
+    if (phone.startsWith('0')) {
+      phone = '964${phone.substring(1)}';
+    }
+
+    if (phone.startsWith('+')) {
+      phone = phone.substring(1);
+    }
+
+    final url = Uri.parse('https://wa.me/$phone');
+
+    await launchUrl(url, mode: LaunchMode.externalApplication);
+  }
+
+  Future<void> _acceptRequest(
+    BuildContext context,
+    QueryDocumentSnapshot request,
+  ) async {
+    final user = FirebaseAuth.instance.currentUser;
+
+    Position mechanicPosition = await Geolocator.getCurrentPosition(
+      desiredAccuracy: LocationAccuracy.high,
+    );
+
+    await request.reference.update({
+      'status': 'في الطريق',
+      'acceptedBy': user?.uid,
+      'acceptedPhone': user?.phoneNumber ?? '',
+      'acceptedAt': FieldValue.serverTimestamp(),
+      'mechanicLatitude': mechanicPosition.latitude,
+      'mechanicLongitude': mechanicPosition.longitude,
+    });
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('الميكانيكي في الطريق'),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -40,40 +100,56 @@ class RequestsListPage extends StatelessWidget {
               final data =
                   requests[index].data() as Map<String, dynamic>;
 
+              final customerName = data['customerName'] ?? '';
+              final phone = data['phone'] ?? '';
+              final serviceType = data['serviceType'] ?? '';
+              final carType = data['carType'] ?? '';
+              final problem = data['problem'] ?? '';
+              final lat = data['latitude'];
+              final lng = data['longitude'];
+
               return Card(
                 margin: const EdgeInsets.all(10),
-                child: ListTile(
-                  title: Text(data['customerName'] ?? ''),
-                  subtitle: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                child: Padding(
+                  padding: const EdgeInsets.all(12),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      Text('${data['serviceType']} - ${data['phone']}'),
+                      Text(
+                        customerName,
+                        style: const TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+
                       const SizedBox(height: 8),
+
+                      Text('نوع الخدمة: $serviceType'),
+                      Text('رقم الهاتف: $phone'),
+                      Text('نوع السيارة: $carType'),
+                      Text('وصف العطل: $problem'),
+
+                      const SizedBox(height: 12),
+
                       ElevatedButton.icon(
                         icon: const Icon(Icons.location_on),
                         label: const Text('فتح الموقع'),
-                        onPressed: () async {
-                          final lat = data['latitude'];
-                          final lng = data['longitude'];
-
-                          if (lat == null || lng == null) return;
-
-                          final url = Uri.parse(
-                            'https://www.google.com/maps/search/?api=1&query=$lat,$lng',
+                        onPressed: () {
+                          _openMap(
+                            lat is num ? lat.toDouble() : null,
+                            lng is num ? lng.toDouble() : null,
                           );
-
-                          await launchUrl(url, mode: LaunchMode.externalApplication);
                         },
                       ),
+
                       const SizedBox(height: 8),
 
                       ElevatedButton.icon(
                         icon: const Icon(Icons.phone),
                         label: const Text('اتصال'),
-                        onPressed: () async {
-                          final phone = data['phone'] ?? '';
-                          final url = Uri.parse('tel:$phone');
-                          await launchUrl(url);
+                        onPressed: () {
+                          _callPhone(phone);
                         },
                       ),
 
@@ -85,46 +161,22 @@ class RequestsListPage extends StatelessWidget {
                           color: Colors.green,
                         ),
                         label: const Text('واتساب'),
-                        onPressed: () async {
-                          String phone = data['phone'] ?? '';
-
-                          if (phone.startsWith('0')) {
-                            phone = '964${phone.substring(1)}';
-                          }
-
-                          final url = Uri.parse('https://wa.me/$phone');
-
-                          await launchUrl(
-                            url,
-                            mode: LaunchMode.externalApplication,
-                          );
+                        onPressed: () {
+                          _openWhatsApp(phone);
                         },
                       ),
+
                       const SizedBox(height: 8),
 
                       ElevatedButton.icon(
                         icon: const Icon(Icons.check_circle),
                         label: const Text('قبول الطلب'),
-                        onPressed: () async {
-
-                        Position mechanicPosition = await Geolocator.getCurrentPosition(
-                          desiredAccuracy: LocationAccuracy.high,
-                        );
-
-                        await requests[index].reference.update({
-                          'status': 'تم القبول',
-                          'acceptedBy': FirebaseAuth.instance.currentUser?.uid,
-                          'acceptedPhone': FirebaseAuth.instance.currentUser?.phoneNumber,
-                          'acceptedAt': FieldValue.serverTimestamp(),
-                          'mechanicLatitude': mechanicPosition.latitude,
-                          'mechanicLongitude': mechanicPosition.longitude,
-                        });
-
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('تم قبول الطلب بنجاح'),
-                            ),
-                          );
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.green,
+                          foregroundColor: Colors.white,
+                        ),
+                        onPressed: () {
+                          _acceptRequest(context, requests[index]);
                         },
                       ),
                     ],
