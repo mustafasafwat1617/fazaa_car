@@ -53,17 +53,14 @@ class MyRequestsPage extends StatelessWidget {
                           fontWeight: FontWeight.bold,
                         ),
                       ),
-
                       const SizedBox(height: 8),
-
                       Text('السيارة: ${data['carType'] ?? ''}'),
                       Text('العطل: ${data['problem'] ?? ''}'),
-
                       Text(
                         data['status'] == 'تم القبول'
                             ? '✅ تم القبول'
                             : data['status'] == 'في الطريق'
-                            ? '🟢 قيد التنفيذ'
+                                ? '🟢 قيد التنفيذ'
                                 : data['status'] == 'تم الإنجاز'
                                     ? '🎉 تم إنجاز الطلب'
                                     : '⏳ بانتظار الميكانيكي',
@@ -77,7 +74,6 @@ class MyRequestsPage extends StatelessWidget {
                           fontWeight: FontWeight.bold,
                         ),
                       ),
-
                       const SizedBox(height: 10),
 
                       if (data['acceptedPhone'] != null)
@@ -102,7 +98,6 @@ class MyRequestsPage extends StatelessWidget {
                           label: const Text('واتساب الميكانيكي'),
                           onPressed: () async {
                             String phone = data['acceptedPhone'] ?? '';
-
                             phone = phone.replaceAll(' ', '');
 
                             if (phone.startsWith('+')) {
@@ -161,7 +156,83 @@ class MyRequestsPage extends StatelessWidget {
 
                       const SizedBox(height: 8),
 
+                      if (data['status'] == 'تم الإنجاز' && data['rated'] != true)
+                        ElevatedButton.icon(
+                          icon: const Icon(Icons.star),
+                          label: const Text('تقييم الخدمة'),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.amber,
+                            foregroundColor: Colors.black,
+                          ),
+                          onPressed: () {
+                            int rating = 0;
 
+                            showDialog(
+                              context: context,
+                              builder: (dialogContext) {
+                                return StatefulBuilder(
+                                  builder: (context, setDialogState) {
+                                    return AlertDialog(
+                                      title: const Text('قيّم الخدمة'),
+                                      content: SizedBox(
+                                        width: 260,
+                                        height: 90,
+                                        child: GridView.count(
+                                          crossAxisCount: 5,
+                                          shrinkWrap: true,
+                                          physics: const NeverScrollableScrollPhysics(),
+                                          children: List.generate(5, (index) {
+                                            return IconButton(
+                                              padding: EdgeInsets.zero,
+                                              iconSize: 30,
+                                              icon: Icon(
+                                                index < rating ? Icons.star : Icons.star_border,
+                                                color: Colors.amber,
+                                              ),
+                                              onPressed: () {
+                                                setDialogState(() {
+                                                  rating = index + 1;
+                                                });
+                                              },
+                                            );
+                                          }),
+                                        ),
+                                      ),
+                                      actions: [
+                                        TextButton(
+                                          onPressed: () {
+                                            Navigator.pop(dialogContext);
+                                          },
+                                          child: const Text('إلغاء'),
+                                        ),
+                                        ElevatedButton(
+                                          onPressed: rating == 0
+                                              ? null
+                                              : () async {
+                                                  await requests[index].reference.update({
+                                                    'rating': rating,
+                                                    'rated': true,
+                                                    'ratedAt': FieldValue.serverTimestamp(),
+                                                  });
+
+                                                  Navigator.pop(dialogContext);
+
+                                                  ScaffoldMessenger.of(context).showSnackBar(
+                                                    const SnackBar(
+                                                      content: Text('شكراً لتقييمك'),
+                                                    ),
+                                                  );
+                                                },
+                                          child: const Text('إرسال'),
+                                        ),
+                                      ],
+                                    );
+                                  },
+                                );
+                              },
+                            );
+                          },
+                        ),
                     ],
                   ),
                 ),
