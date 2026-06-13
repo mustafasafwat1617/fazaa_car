@@ -15,7 +15,7 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'admin_providers_page.dart';
-
+import 'admin_dashboard_page.dart';
 
 
 
@@ -166,11 +166,26 @@ if (isAdmin) ...[
                     ),
                   );
                 },
+
+
+
                 child: const Text(
                   'أنا ميكانيكي',
                   style: TextStyle(fontSize: 22),
                 ),
               ),
+            ),
+
+            ElevatedButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => const AdminDashboardPage(),
+                  ),
+                );
+              },
+              child: const Text('إحصائيات الأدمن'),
             ),
 
             const SizedBox(height: 15),

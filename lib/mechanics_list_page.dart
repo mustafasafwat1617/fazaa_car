@@ -103,10 +103,27 @@ class _MechanicsListPageState extends State<MechanicsListPage> {
                 };
               }).toList();
 
-              mechanics.sort(
-                (a, b) => (a['distance'] as double)
-                    .compareTo(b['distance'] as double),
-              );
+              mechanics.sort((a, b) {
+                final dataA = a['data'] as Map<String, dynamic>;
+                final dataB = b['data'] as Map<String, dynamic>;
+
+                final ratingA = ((dataA['ratingAverage'] ?? 0) as num).toDouble();
+                final ratingB = ((dataB['ratingAverage'] ?? 0) as num).toDouble();
+
+                final jobsA = ((dataA['completedJobs'] ?? 0) as num).toInt();
+                final jobsB = ((dataB['completedJobs'] ?? 0) as num).toInt();
+
+                final distanceA = a['distance'] as double;
+                final distanceB = b['distance'] as double;
+
+                final ratingCompare = ratingB.compareTo(ratingA);
+                if (ratingCompare != 0) return ratingCompare;
+
+                final jobsCompare = jobsB.compareTo(jobsA);
+                if (jobsCompare != 0) return jobsCompare;
+
+                return distanceA.compareTo(distanceB);
+              });
 
               return ListView.builder(
                 itemCount: mechanics.length,
@@ -123,12 +140,61 @@ class _MechanicsListPageState extends State<MechanicsListPage> {
                       subtitle: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text('${data['specialty'] ?? 'بدون تخصص'} - ${data['phone'] ?? 'بدون رقم'}'),
-                          Text(
-                            distance == 999999
-                                ? 'الموقع غير متوفر'
-                                : 'يبعد عنك: ${distance.toStringAsFixed(2)} كم',
+
+                        if (((data['ratingAverage'] ?? 0) as num).toDouble() >= 4.5 &&
+                              ((data['completedJobs'] ?? 0) as num).toInt() >= 10)
+                            Container(
+                              margin: const EdgeInsets.only(bottom: 4),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8,
+                                vertical: 4,
+                              ),
+                              decoration: BoxDecoration(
+                                color: Colors.amber,
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: const Text(
+                                '🏆 موثوق',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+
+
+
+
+
+
+
+
+
+
+                        Text(
+                          '${data['specialty'] ?? 'بدون تخصص'} - ${data['phone'] ?? 'بدون رقم'}',
+                        ),
+
+                        Text(
+                          '⭐ ${((data['ratingAverage'] ?? 0) as num).toDouble().toStringAsFixed(1)} (${data['ratingCount'] ?? 0} تقييم)',
+                          style: const TextStyle(
+                            color: Colors.orange,
+                            fontWeight: FontWeight.bold,
                           ),
+                        ),
+
+                        Text(
+                          '✅ ${data['completedJobs'] ?? 0} خدمة منجزة',
+                          style: const TextStyle(
+                            color: Colors.green,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+
+                        Text(
+                          distance == 999999
+                              ? 'الموقع غير متوفر'
+                              : 'يبعد عنك: ${distance.toStringAsFixed(2)} كم',
+                        ),
                           const SizedBox(height: 8),
 
                           ElevatedButton.icon(

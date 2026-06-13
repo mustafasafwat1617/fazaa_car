@@ -60,6 +60,7 @@ class _MechanicPageState extends State<MechanicPage> {
         'longitude': position.longitude,
         'available': true,
         'approved': false,
+        'rejected': false,
         'createdAt': FieldValue.serverTimestamp(),
       });
 

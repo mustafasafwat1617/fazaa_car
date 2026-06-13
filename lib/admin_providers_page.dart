@@ -4,15 +4,22 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 class AdminProvidersPage extends StatelessWidget {
   const AdminProvidersPage({super.key});
 
-  Future<void> approveProvider(DocumentSnapshot doc) async {
+ Future<void> approveProvider(DocumentSnapshot doc) async {
+  await doc.reference.update({
+    'approved': true,
+    'rejected': false,
+  });
+}
+
+
+
+  Future<void> rejectProvider(DocumentSnapshot doc) async {
     await doc.reference.update({
-      'approved': true,
+      'approved': false,
+      'rejected': true,
     });
   }
 
-  Future<void> rejectProvider(DocumentSnapshot doc) async {
-    await doc.reference.delete();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -24,6 +31,7 @@ class AdminProvidersPage extends StatelessWidget {
         stream: FirebaseFirestore.instance
             .collection('mechanics')
             .where('approved', isEqualTo: false)
+            .where('rejected', isEqualTo: false)
             .snapshots(),
         builder: (context, snapshot) {
           if (!snapshot.hasData) {

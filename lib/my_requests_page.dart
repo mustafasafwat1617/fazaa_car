@@ -4,6 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'tracking_map_page.dart';
+import 'completed_requests_page.dart';
 
 class MyRequestsPage extends StatelessWidget {
   const MyRequestsPage({super.key});
@@ -15,6 +16,19 @@ class MyRequestsPage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('طلباتي'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.history),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => const CompletedRequestsPage(),
+                ),
+              );
+            },
+          ),
+        ],
       ),
       body: StreamBuilder<QuerySnapshot>(
         stream: FirebaseFirestore.instance
@@ -26,7 +40,10 @@ class MyRequestsPage extends StatelessWidget {
             return const Center(child: CircularProgressIndicator());
           }
 
-          final requests = snapshot.data!.docs;
+         final requests = snapshot.data!.docs.where((doc) {
+           final data = doc.data() as Map<String, dynamic>;
+           return data['status'] != 'تم الإنجاز';
+         }).toList();
 
           if (requests.isEmpty) {
             return const Center(
@@ -214,6 +231,35 @@ class MyRequestsPage extends StatelessWidget {
                                                     'rated': true,
                                                     'ratedAt': FieldValue.serverTimestamp(),
                                                   });
+
+                                                  final providerPhone = data['providerPhone'];
+
+                                                  if (providerPhone != null) {
+                                                    final mechanicQuery = await FirebaseFirestore.instance
+                                                        .collection('mechanics')
+                                                        .where('phone', isEqualTo: providerPhone)
+                                                        .limit(1)
+                                                        .get();
+
+                                                    if (mechanicQuery.docs.isNotEmpty) {
+                                                      final mechanicDoc = mechanicQuery.docs.first;
+                                                      final mechanicData = mechanicDoc.data();
+
+                                                      final oldTotal = mechanicData['ratingTotal'] ?? 0;
+                                                      final oldCount = mechanicData['ratingCount'] ?? 0;
+
+                                                      final newTotal = oldTotal + rating;
+                                                      final newCount = oldCount + 1;
+                                                      final newAverage = newTotal / newCount;
+
+                                                      await mechanicDoc.reference.update({
+                                                        'ratingTotal': newTotal,
+                                                        'ratingCount': newCount,
+                                                        'ratingAverage': newAverage,
+                                                        'completedJobs': FieldValue.increment(1),
+                                                      });
+                                                    }
+                                                  }
 
                                                   Navigator.pop(dialogContext);
 
