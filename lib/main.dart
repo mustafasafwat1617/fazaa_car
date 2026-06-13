@@ -14,6 +14,12 @@ import 'tracking_map_page.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'admin_providers_page.dart';
+
+
+
+
+
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -117,10 +123,31 @@ SizedBox(
     child: const Text(
       'طلباتي',
       style: TextStyle(fontSize: 22),
+
     ),
   ),
 ),
 
+const SizedBox(height: 15),
+
+SizedBox(
+  width: double.infinity,
+  height: 55,
+  child: ElevatedButton(
+    onPressed: () {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => const AdminProvidersPage(),
+        ),
+      );
+    },
+    child: const Text(
+      'لوحة الأدمن',
+      style: TextStyle(fontSize: 20),
+    ),
+  ),
+),
             SizedBox(
               width: double.infinity,
               height: 55,
