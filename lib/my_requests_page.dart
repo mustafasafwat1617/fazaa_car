@@ -63,7 +63,7 @@ class MyRequestsPage extends StatelessWidget {
                         data['status'] == 'تم القبول'
                             ? '✅ تم القبول'
                             : data['status'] == 'في الطريق'
-                                ? '🚗 في الطريق'
+                            ? '🟢 قيد التنفيذ'
                                 : data['status'] == 'تم الإنجاز'
                                     ? '🎉 تم إنجاز الطلب'
                                     : '⏳ بانتظار الميكانيكي',
@@ -130,12 +130,13 @@ class MyRequestsPage extends StatelessWidget {
 
                       const SizedBox(height: 8),
 
-                      if (data['acceptedPhone'] != null)
-                        const Text(
-                          '🚗 الميكانيكي في الطريق',
-                          style: TextStyle(
+                      if (data['providerName'] != null)
+                        Text(
+                          '🚗 ${data['providerName']} متجه إليك',
+                          style: const TextStyle(
                             color: Colors.green,
                             fontWeight: FontWeight.bold,
+                            fontSize: 16,
                           ),
                         ),
 

@@ -259,6 +259,7 @@ class _AcceptedRequestsPageState extends State<AcceptedRequestsPage> {
 
                           await requests[index].reference.update({
                             'status': 'تم الإنجاز',
+                            'completedAt': FieldValue.serverTimestamp(),
                           });
 
                           ScaffoldMessenger.of(context).showSnackBar(

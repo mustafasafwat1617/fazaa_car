@@ -48,6 +48,21 @@ class RequestsListPage extends StatelessWidget {
   ) async {
     final user = FirebaseAuth.instance.currentUser;
 
+    final mechanicSnapshot = await FirebaseFirestore.instance
+        .collection('mechanics')
+        .where('userId', isEqualTo: user?.uid)
+        .limit(1)
+        .get();
+
+    String mechanicName = 'الميكانيكي';
+    String mechanicPhone = user?.phoneNumber ?? '';
+
+    if (mechanicSnapshot.docs.isNotEmpty) {
+      final mechanicData = mechanicSnapshot.docs.first.data();
+      mechanicName = mechanicData['name'] ?? 'الميكانيكي';
+      mechanicPhone = mechanicData['phone'] ?? mechanicPhone;
+    }
+
     Position mechanicPosition = await Geolocator.getCurrentPosition(
       desiredAccuracy: LocationAccuracy.high,
     );
@@ -59,6 +74,9 @@ class RequestsListPage extends StatelessWidget {
       'acceptedAt': FieldValue.serverTimestamp(),
       'mechanicLatitude': mechanicPosition.latitude,
       'mechanicLongitude': mechanicPosition.longitude,
+      'providerName': mechanicName,
+      'providerPhone': mechanicPhone,
+      'providerMessage': '$mechanicName متجه إليك',
     });
 
     ScaffoldMessenger.of(context).showSnackBar(
