@@ -59,6 +59,7 @@ class _MechanicPageState extends State<MechanicPage> {
         'latitude': position.latitude,
         'longitude': position.longitude,
         'available': true,
+        'approved': false,
         'createdAt': FieldValue.serverTimestamp(),
       });
 

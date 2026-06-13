@@ -71,16 +71,13 @@ class _MechanicsListPageState extends State<MechanicsListPage> {
           return StreamBuilder<QuerySnapshot>(
             stream: FirebaseFirestore.instance
                         .collection('mechanics')
-                        .where(
-                          'specialty',
-                          isEqualTo: widget.specialty,
-                          )
-                          .where(
-                            'available',
-                            isEqualTo: true,
+                        .where('specialty',isEqualTo: widget.specialty)
 
-                        )
+                          .where('available',isEqualTo: true)
+                          .where('approved', isEqualTo: true)
+
                         .snapshots(),
+
             builder: (context, snapshot) {
               if (!snapshot.hasData) {
                 return const Center(child: CircularProgressIndicator());
