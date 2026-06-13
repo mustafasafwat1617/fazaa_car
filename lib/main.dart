@@ -66,6 +66,10 @@ class HomePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+
+  final currentPhone = FirebaseAuth.instance.currentUser?.phoneNumber;
+  final isAdmin = currentPhone == '+9647700904722';
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('فزعة كار'),
@@ -128,26 +132,28 @@ SizedBox(
   ),
 ),
 
-const SizedBox(height: 15),
+if (isAdmin) ...[
+  const SizedBox(height: 15),
 
-SizedBox(
-  width: double.infinity,
-  height: 55,
-  child: ElevatedButton(
-    onPressed: () {
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (_) => const AdminProvidersPage(),
-        ),
-      );
-    },
-    child: const Text(
-      'لوحة الأدمن',
-      style: TextStyle(fontSize: 20),
+  SizedBox(
+    width: double.infinity,
+    height: 55,
+    child: ElevatedButton(
+      onPressed: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => const AdminProvidersPage(),
+          ),
+        );
+      },
+      child: const Text(
+        'لوحة الأدمن',
+        style: TextStyle(fontSize: 20),
+      ),
     ),
   ),
-),
+],
             SizedBox(
               width: double.infinity,
               height: 55,
